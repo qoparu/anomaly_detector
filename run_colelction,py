@@ -1,0 +1,59 @@
+import time
+import pandas as pd
+from monitor import get_system_metrics
+from anomaly_injector import run_cpu_anomaly
+
+# --- НАСТРОЙКИ ---
+NORMAL_DURATION_SEC = 300   # 5 минут сбора данных в нормальном режиме
+ANOMALY_DURATION_SEC = 120  # 2 минуты сбора данных во время аномалии
+OUTPUT_CSV_FILE = 'training_data.csv'
+# ----------------
+
+def collect_data(duration_sec, label):
+    """
+    Собирает данные в течение заданного времени с указанной меткой.
+    """
+    data = []
+    print(f"[*] Начинаю сбор данных с меткой '{label}' на {duration_sec} секунд...")
+    
+    end_time = time.time() + duration_sec
+    while time.time() < end_time:
+        metrics = get_system_metrics()
+        metrics['label'] = label
+        data.append(metrics)
+        print(f"    Собрано: {metrics}")
+    
+    print(f"[*] Сбор данных с меткой '{label}' завершен.")
+    return data
+
+if __name__ == '__main__':
+    all_data = []
+
+    # 1. Сбор данных в нормальном режиме
+    all_data.extend(collect_data(NORMAL_DURATION_SEC, label=0)) # 0 - норма
+
+    # 2. Сбор данных во время симуляции аномалии
+    # Важно: для чистоты эксперимента лучше запустить `run_cpu_anomaly` 
+    # в отдельном процессе или терминале, но для простоты можно так.
+    # В идеале, аномалия должна запускаться параллельно сбору.
+    # Простой способ - запустить anomaly_injector.py в другом терминале, а здесь просто собирать данные.
+    
+    # Для простоты, сначала запустим аномалию, а потом соберем данные "во время" нее
+    # (предполагая, что система не сразу вернется в норму)
+    # Более корректный способ - использовать потоки или асинхронность.
+    
+    input("[*] Сейчас будет запущена аномалия. Нажмите Enter для продолжения...")
+    # Этот блок будет собирать данные во время работы инжектора аномалий.
+    # Чтобы это работало, нужно запустить anomaly_injector.py в другом окне терминала,
+    # а после этого нажать Enter здесь.
+    all_data.extend(collect_data(ANOMALY_DURATION_SEC, label=1)) # 1 - аномалия
+
+    # 3. Сохранение данных в CSV
+    print(f"[*] Сохраняю {len(all_data)} записей в файл {OUTPUT_CSV_FILE}...")
+    df = pd.DataFrame(all_data)
+    
+    # Упорядочим колонки для красоты
+    df = df[['cpu_percent', 'ram_percent', 'swap_percent', 'num_processes', 'label']]
+    
+    df.to_csv(OUTPUT_CSV_FILE, index=False)
+    print("[*] Готово! Обучающий набор данных сохранен.")
