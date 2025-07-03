@@ -17,13 +17,22 @@ The software monitors system performance indicators, uses a machine learning mod
 ## Project Structure
 
 ```
-/
-├── anomaly_detector/      # Main application package
-├── scripts/               # Helper scripts (data collection, training)
-├── main_detector.py       # Main entry point for the real-time detector
-├── .gitignore             # Git ignore file
-├── README.md              # This file
-└── requirements.txt       # Python dependencies
+anomaly-detector-project/
+│
+├── anomaly_detector/      # Это Python-пакет с основной логикой
+│   ├── __init__.py        # Обязательный файл, чтобы папка считалась пакетом
+│   ├── monitoring.py      # Здесь лежит код для сбора метрик
+│   └── simulation.py      # Здесь лежит код для симуляции аномалий
+│
+├── scripts/               # Папка со скриптами для отдельных задач
+│   ├── collect_data.py    # Скрипт для сбора обучающих данных
+│   └── train_model.py     # Скрипт для обучения модели
+│
+├── main_detector.py       # Главный файл для запуска детектора в реальном времени
+│
+├── .gitignore             # Файл для Git, чтобы игнорировать ненужные файлы
+├── README.md              # Описание проекта
+└── requirements.txt       # Список зависимостей
 ```
 
 ## Installation
